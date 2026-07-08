@@ -13,10 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Daftarkan alias middleware custom untuk auth manual
         $middleware->alias([
-            'auth.custom' => EnsureUserIsAuthenticated::class,
-            'guest.redirect' => RedirectIfAuthenticated::class,
+            'auth.custom' => \App\Http\Middleware\EnsureUserIsAuthenticated::class,
+            'guest.redirect' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+            'role' => \App\Http\Middleware\CheckRole::class, // tambahkan baris ini
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

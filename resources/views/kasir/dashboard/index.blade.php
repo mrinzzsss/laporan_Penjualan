@@ -16,8 +16,21 @@
     </div>
 
     <a href="{{ route('transaksi.create') }}"
-       class="inline-block bg-sky-400 hover:bg-sky-500 text-white font-medium px-5 py-2.5 rounded-lg">
+       class="inline-block bg-sky-400 hover:bg-sky-500 text-white font-medium px-5 py-2.5 rounded-lg mb-8">
         + Input Transaksi Baru
     </a>
+
+    <div>
+        <h2 class="text-sm font-semibold text-slate-700 mb-3">Menu / Produk</h2>
+
+        {{--
+            Klik "+" di kartu produk langsung menuju halaman Tambah Transaksi
+            dengan barang tersebut sudah otomatis dipilihkan (lihat script di create.blade.php).
+        --}}
+        <x-product-grid
+            :barang-list="$barangList"
+            :add-url-for="fn ($barang) => route('transaksi.create', ['barang' => $barang->id])"
+        />
+    </div>
 </div>
 @endsection

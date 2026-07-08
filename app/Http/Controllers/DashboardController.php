@@ -35,6 +35,10 @@ class DashboardController extends Controller
             ->whereDate('tanggal', now()->toDateString())
             ->count();
 
-        return view('kasir.dashboard.index', compact('jumlahTransaksiHariIni'));
+        // Daftar produk aktif untuk shortcut "tambah transaksi" di dashboard,
+        // gambar+nama+deskripsi diambil langsung dari tabel barang.
+        $barangList = Barang::active()->orderBy('nama')->get();
+
+        return view('kasir.dashboard.index', compact('jumlahTransaksiHariIni', 'barangList'));
     }
 }
