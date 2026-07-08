@@ -36,7 +36,7 @@ class TransaksiController extends Controller
 
         $transaksi = $query->paginate(10)->withQueryString();
 
-        return view('transaksi.index', compact('transaksi'));
+        return view('kasir.transaksi.index', compact('transaksi'));
     }
 
     /**
@@ -52,7 +52,7 @@ class TransaksiController extends Controller
             $q->active()->orderBy('nama');
         }])->get();
 
-        return view('transaksi.create', compact('barangList', 'kategoriList'));
+        return view('kasir.transaksi.create', compact('barangList', 'kategoriList'));
     }
 
     /**
@@ -100,7 +100,7 @@ class TransaksiController extends Controller
             ->kode($transaksi->kode_transaksi)
             ->get();
 
-        return view('transaksi.show', [
+        return view('kasir.transaksi.show', [
             'kodeTransaksi' => $transaksi->kode_transaksi,
             'tanggal' => $transaksi->tanggal,
             'user' => $transaksi->user,
@@ -117,7 +117,7 @@ class TransaksiController extends Controller
         $items = Transaksi::kode($transaksi->kode_transaksi)->get();
         $barangList = Barang::active()->orderBy('nama')->get();
 
-        return view('transaksi.edit', [
+        return view('kasir.transaksi.edit', [
             'kodeTransaksi' => $transaksi->kode_transaksi,
             'tanggal' => $transaksi->tanggal,
             'items' => $items,

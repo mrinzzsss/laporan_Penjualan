@@ -27,26 +27,40 @@ Route::middleware('guest.redirect')->group(function () {
 Route::middleware('auth.custom')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Dashboard: satu route, tapi tampilan beda tergantung role (lihat DashboardController).
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // CRUD kategori barang
-    Route::resource('kategori', KategoriController::class)->except(['show']);
+    /*
+    |----------------------------------------------------------------------
+    | Khusus Admin: CRUD kategori, barang, dan laporan
+    |----------------------------------------------------------------------
+    */
+    Route::middleware('role:admin')->group(function () {
+        // CRUD kategori barang
+        Route::resource('kategori', KategoriController::class)->except(['show']);
 
-    // CRUD barang + upload gambar ke storage
-    Route::resource('barang', BarangController::class);
+        // CRUD barang + upload gambar ke storage
+        Route::resource('barang', BarangController::class);
 
-    // CRUD transaksi penjualan (data sumber untuk laporan & chart)
-    Route::resource('transaksi', TransaksiController::class);
+        // Laporan chart tren penjualan + export PDF (dengan chart sebagai gambar)
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])->name('index');
 
-    // Laporan chart tren penjualan + export PDF (dengan chart sebagai gambar)
-    Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/', [ReportController::class, 'index'])->name('index');
+            // Mode default: chart PNG dibuat di storage lalu dihapus lagi setelah PDF jadi (cleanup).
+            Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
 
-        // Mode default: chart PNG dibuat di storage lalu dihapus lagi setelah PDF jadi (cleanup).
-        Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
+            // Mode arsip: chart PNG dibuat di storage dan TIDAK dihapus (tidak ada cleanup),
+            // supaya bisa disimpan/diakses lagi nanti. Perlu dibersihkan manual/berkala.
+            Route::get('/export-pdf-archive', [ReportController::class, 'exportPdfArchive'])->name('export-pdf-archive');
+        });
+    });
 
-        // Mode arsip: chart PNG dibuat di storage dan TIDAK dihapus (tidak ada cleanup),
-        // supaya bisa disimpan/diakses lagi nanti. Perlu dibersihkan manual/berkala.
-        Route::get('/export-pdf-archive', [ReportController::class, 'exportPdfArchive'])->name('export-pdf-archive');
+    /*
+    |----------------------------------------------------------------------
+    | Khusus Kasir: input transaksi penjualan
+    |----------------------------------------------------------------------
+    */
+    Route::middleware('role:kasir')->group(function () {
+        Route::resource('transaksi', TransaksiController::class);
     });
 });

@@ -23,7 +23,7 @@ class BarangController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('barang.index', compact('barang'));
+        return view('admin.barang.index', compact('barang'));
     }
 
     /**
@@ -33,7 +33,7 @@ class BarangController extends Controller
     {
         $kategoriList = Kategori::orderBy('nama')->get();
 
-        return view('barang.create', compact('kategoriList'));
+        return view('admin.barang.create', compact('kategoriList'));
     }
 
     /**
@@ -71,7 +71,7 @@ class BarangController extends Controller
     {
         $barang->load('kategori');
 
-        return view('barang.show', compact('barang'));
+        return view('admin.barang.show', compact('barang'));
     }
 
     /**
@@ -81,7 +81,7 @@ class BarangController extends Controller
     {
         $kategoriList = Kategori::orderBy('nama')->get();
 
-        return view('barang.edit', compact('barang', 'kategoriList'));
+        return view('admin.barang.edit', compact('barang', 'kategoriList'));
     }
 
     /**

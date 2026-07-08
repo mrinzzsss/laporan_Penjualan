@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Hash;
 class UserSeeder extends Seeder
 {
     /**
-     * Seed 1 akun admin default untuk login & jadi pencatat transaksi dummy.
+     * Seed 1 akun admin (CRUD kategori/barang/laporan) dan
+     * 1 akun kasir (input transaksi) untuk login & data dummy.
      */
     public function run(): void
     {
@@ -18,6 +19,16 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin Kantin',
                 'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'kasir@kantin.test'],
+            [
+                'name' => 'Kasir Kantin',
+                'password' => Hash::make('password'),
+                'role' => 'kasir',
             ]
         );
     }

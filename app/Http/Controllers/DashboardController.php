@@ -6,26 +6,35 @@ use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     /**
-     * Dashboard simpel: cuma nunjukin jumlah data di tiap tabel.
-     * Tidak bergantung ke ReportService (sengaja dilepas, biar tidak
-     * error kalau service itu belum/tidak dibuat).
+     * Dashboard beda tampilan tergantung role:
+     * - admin: ringkasan jumlah data semua tabel.
+     * - kasir: shortcut buat input transaksi + jumlah transaksi miliknya hari ini.
      */
     public function index()
     {
-        $jumlahUser = User::count();
-        $jumlahKategori = Kategori::count();
-        $jumlahBarang = Barang::count();
-        $jumlahTransaksi = Transaksi::count();
+        if (Auth::user()->isAdmin()) {
+            $jumlahUser = User::count();
+            $jumlahKategori = Kategori::count();
+            $jumlahBarang = Barang::count();
+            $jumlahTransaksi = Transaksi::count();
 
-        return view('dashboard', compact(
-            'jumlahUser',
-            'jumlahKategori',
-            'jumlahBarang',
-            'jumlahTransaksi',
-        ));
+            return view('admin.dashboard.index', compact(
+                'jumlahUser',
+                'jumlahKategori',
+                'jumlahBarang',
+                'jumlahTransaksi',
+            ));
+        }
+
+        $jumlahTransaksiHariIni = Transaksi::where('user_id', Auth::id())
+            ->whereDate('tanggal', now()->toDateString())
+            ->count();
+
+        return view('kasir.dashboard.index', compact('jumlahTransaksiHariIni'));
     }
 }

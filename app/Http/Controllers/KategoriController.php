@@ -21,7 +21,7 @@ class KategoriController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('kategori.index', compact('kategori'));
+        return view('admin.kategori.index', compact('kategori'));
     }
 
     /**
@@ -29,7 +29,7 @@ class KategoriController extends Controller
      */
     public function create()
     {
-        return view('kategori.create');
+        return view('admin.kategori.create');
     }
 
     /**
@@ -52,7 +52,7 @@ class KategoriController extends Controller
      */
     public function edit(Kategori $kategori)
     {
-        return view('kategori.edit', compact('kategori'));
+        return view('admin.kategori.edit', compact('kategori'));
     }
 
     /**

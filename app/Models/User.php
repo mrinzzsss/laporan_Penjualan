@@ -19,6 +19,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -50,5 +51,19 @@ class User extends Authenticatable
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class);
+    }
+
+    /**
+     * Helper cek role. Sengaja pakai plain string ('admin'/'kasir'),
+     * bukan enum, biar konsisten dengan gaya project yang lain.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isKasir(): bool
+    {
+        return $this->role === 'kasir';
     }
 }

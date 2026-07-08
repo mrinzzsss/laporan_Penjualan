@@ -31,7 +31,7 @@ class ReportController extends Controller
         $topBarang = $this->topBarang($startDate, $endDate);
         $revenueByKategori = $this->revenueByKategori($startDate, $endDate);
 
-        return view('reports.index', [
+        return view('admin.reports.index', [
             'trendData' => $trendData,
             'topBarang' => $topBarang,
             'revenueByKategori' => $revenueByKategori,
@@ -105,7 +105,7 @@ class ReportController extends Controller
 
         $chartPaths = [$trendChartPath, $topBarangChartPath, $kategoriChartPath];
 
-        $html = view('reports.pdf', [
+        $html = view('admin.reports.pdf', [
             'trendData' => $trendData,
             'topBarang' => $topBarang,
             'revenueByKategori' => $revenueByKategori,

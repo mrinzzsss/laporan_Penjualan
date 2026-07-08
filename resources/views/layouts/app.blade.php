@@ -26,27 +26,38 @@
                            class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
                             Dashboard
                         </a>
-                        <a href="{{ route('kategori.index') }}"
-                           class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('kategori.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
-                            Kategori
-                        </a>
-                        <a href="{{ route('barang.index') }}"
-                           class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('barang.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
-                            Barang
-                        </a>
-                        <a href="{{ route('transaksi.index') }}"
-                           class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('transaksi.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
-                            Transaksi
-                        </a>
-                        <a href="{{ route('reports.index') }}"
-                           class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('reports.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
-                            Laporan
-                        </a>
+
+                        @if (auth()->user()?->isAdmin())
+                            <a href="{{ route('kategori.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('kategori.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                Kategori
+                            </a>
+                            <a href="{{ route('barang.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('barang.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                Barang
+                            </a>
+                            <a href="{{ route('reports.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('reports.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                Laporan
+                            </a>
+                        @endif
+
+                        @if (auth()->user()?->isKasir())
+                            <a href="{{ route('transaksi.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('transaksi.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                Transaksi
+                            </a>
+                        @endif
                     </div>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <span class="hidden sm:block text-sm text-slate-500">{{ auth()->user()->name ?? '' }}</span>
+                    <span class="hidden sm:block text-sm text-slate-500">
+                        {{ auth()->user()->name ?? '' }}
+                        @if (auth()->user())
+                            <span class="text-xs text-slate-400">({{ ucfirst(auth()->user()->role) }})</span>
+                        @endif
+                    </span>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm font-medium text-slate-500 hover:text-red-500 transition">
@@ -59,10 +70,14 @@
             {{-- Mobile nav --}}
             <div class="md:hidden flex gap-1 pb-3 -mt-1 overflow-x-auto">
                 <a href="{{ route('dashboard') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('dashboard') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Dashboard</a>
-                <a href="{{ route('kategori.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('kategori.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Kategori</a>
-                <a href="{{ route('barang.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('barang.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Barang</a>
-                <a href="{{ route('transaksi.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('transaksi.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Transaksi</a>
-                <a href="{{ route('reports.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('reports.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Laporan</a>
+                @if (auth()->user()?->isAdmin())
+                    <a href="{{ route('kategori.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('kategori.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Kategori</a>
+                    <a href="{{ route('barang.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('barang.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Barang</a>
+                    <a href="{{ route('reports.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('reports.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Laporan</a>
+                @endif
+                @if (auth()->user()?->isKasir())
+                    <a href="{{ route('transaksi.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('transaksi.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Transaksi</a>
+                @endif
             </div>
         </div>
     </nav>
