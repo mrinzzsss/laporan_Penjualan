@@ -29,10 +29,6 @@
 
         <dl class="divide-y divide-slate-100 text-sm">
             <div class="flex justify-between py-2">
-                <dt class="text-slate-500">Kode Barang</dt>
-                <dd class="text-slate-800 font-medium">{{ $barang->kode ?? '-' }}</dd>
-            </div>
-            <div class="flex justify-between py-2">
                 <dt class="text-slate-500">Harga</dt>
                 <dd class="text-slate-800 font-medium">Rp {{ number_format($barang->harga, 0, ',', '.') }}</dd>
             </div>

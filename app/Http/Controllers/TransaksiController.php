@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,9 +12,9 @@ use Illuminate\Support\Facades\DB;
 class TransaksiController extends Controller
 {
     /**
-     * Tampilkan daftar transaksi, dikelompokkan per nota (kode_transaksi).
-     * Karena tabel "transaksi" flat (1 baris = 1 barang), daftar di sini
-     * di-group supaya satu nota tetap tampil sebagai satu baris.
+     * Tampilkan daftar transaksi penjualan.
+     * Menggunakan groupBy('kode_transaksi') dan fungsi agregasi DB::raw()
+     * untuk menggabungkan beberapa baris barang belanjaan menjadi 1 ringkasan nota.
      */
     public function index(Request $request)
     {
@@ -23,7 +24,7 @@ class TransaksiController extends Controller
                 DB::raw('MIN(id) as id'),
                 DB::raw('MAX(tanggal) as tanggal'),
                 DB::raw('COUNT(*) as jumlah_item'),
-                DB::raw('SUM(subtotal) as total'),
+                DB::raw('SUM(subtotal) as total'), // Menghitung total belanja per kode nota
             ])
             ->when($request->search, function ($q, $search) {
                 $q->where('kode_transaksi', 'like', "%{$search}%");
@@ -31,7 +32,7 @@ class TransaksiController extends Controller
             ->when($request->start_date && $request->end_date, function ($q) use ($request) {
                 $q->whereBetween('tanggal', [$request->start_date, $request->end_date]);
             })
-            ->groupBy('kode_transaksi')
+            ->groupBy('kode_transaksi') // Mengelompokkan per kode nota
             ->orderByDesc('tanggal');
 
         $transaksi = $query->paginate(10)->withQueryString();
@@ -40,29 +41,30 @@ class TransaksiController extends Controller
     }
 
     /**
-     * Tampilkan form tambah transaksi.
+     * Tampilkan form tambah transaksi penjualan.
+     * Mengambil daftar barang aktif dikelompokkan per kategori untuk tampilan card katalog kasir.
      */
     public function create()
     {
         $barangList = Barang::active()->orderBy('nama')->get();
 
-        // Dikelompokkan per kategori untuk ditampilkan sebagai card menu
-        // di atas form (mempermudah pemilihan barang tanpa scroll dropdown panjang).
-        $kategoriList = \App\Models\Kategori::with(['barang' => function ($q) {
+        $kategoriList = Kategori::with(['barang' => function ($q) {
             $q->active()->orderBy('nama');
         }])->get();
 
-        return view('kasir.transaksi.create', compact('barangList', 'kategoriList'));
+        $kodeAuto = Transaksi::generateNextKode();
+
+        return view('kasir.transaksi.create', compact('barangList', 'kategoriList', 'kodeAuto'));
     }
 
     /**
-     * Simpan transaksi baru. Satu nota (kode_transaksi) bisa berisi banyak barang,
-     * masing-masing disimpan sebagai satu baris terpisah di tabel transaksi.
-     * Format input yang diharapkan dari form:
-     * kode_transaksi, tanggal, items[][barang_id], items[][jumlah]
+     * Simpan nota transaksi baru.
+     * Membungkus proses menyimpan beberapa item barang sekaligus menggunakan DB::transaction().
+     * Tujuannya menjamin integritas data: jika salah satu item gagal disimpan, seluruh query dibatalkan (rollback).
      */
     public function store(Request $request)
     {
+        // Validasi input nota & array barang belanjaan dari kasir
         $validated = $request->validate([
             'kode_transaksi' => ['required', 'string', 'max:50', 'unique:transaksi,kode_transaksi'],
             'tanggal' => ['required', 'date'],
@@ -71,17 +73,19 @@ class TransaksiController extends Controller
             'items.*.jumlah' => ['required', 'integer', 'min:1'],
         ]);
 
+        // DB::transaction menjamin semua item berhasil disimpan atau tidak sama sekali
         DB::transaction(function () use ($validated) {
             foreach ($validated['items'] as $item) {
                 $barang = Barang::findOrFail($item['barang_id']);
 
+                // Simpan setiap item barang sebagai 1 record baris di tabel transaksi
                 Transaksi::create([
                     'kode_transaksi' => $validated['kode_transaksi'],
                     'barang_id' => $barang->id,
-                    'user_id' => Auth::id(),
+                    'user_id' => Auth::id(), // ID kasir yang menginput transaksi
                     'tanggal' => $validated['tanggal'],
                     'jumlah' => $item['jumlah'],
-                    'harga_satuan' => $barang->harga,
+                    'harga_satuan' => $barang->harga, // Snapshot harga barang saat ini
                     'subtotal' => $barang->harga * $item['jumlah'],
                 ]);
             }
@@ -92,7 +96,7 @@ class TransaksiController extends Controller
     }
 
     /**
-     * Tampilkan detail transaksi (semua baris dengan kode_transaksi yang sama).
+     * Tampilkan detail rincian belanja per nota transaksi.
      */
     public function show(Transaksi $transaksi)
     {
@@ -117,17 +121,22 @@ class TransaksiController extends Controller
         $items = Transaksi::kode($transaksi->kode_transaksi)->get();
         $barangList = Barang::active()->orderBy('nama')->get();
 
+        $kategoriList = Kategori::with(['barang' => function ($q) {
+            $q->active()->orderBy('nama');
+        }])->get();
+
         return view('kasir.transaksi.edit', [
             'kodeTransaksi' => $transaksi->kode_transaksi,
             'tanggal' => $transaksi->tanggal,
             'items' => $items,
             'barangList' => $barangList,
+            'kategoriList' => $kategoriList,
         ]);
     }
 
     /**
-     * Update transaksi: baris lama (kode_transaksi lama) dihapus, diganti baris baru.
-     * Lebih sederhana & aman daripada sinkronisasi parsial per baris.
+     * Update transaksi menggunakan strategi Delete-and-Recreate di dalam DB::transaction.
+     * Baris barang lama dihapus sekaligus lalu digantikan dengan baris barang belanjaan baru.
      */
     public function update(Request $request, Transaksi $transaksi)
     {
@@ -141,9 +150,7 @@ class TransaksiController extends Controller
             'items.*.jumlah' => ['required', 'integer', 'min:1'],
         ]);
 
-        // Tabel transaksi flat, satu kode_transaksi bisa punya banyak baris.
-        // Jadi tidak bisa pakai rule unique bawaan (yang cuma bisa exclude 1 baris).
-        // Kalau kode diganti, pastikan kode barunya belum dipakai nota lain secara manual.
+        // Cek jika kode transaksi diubah, pastikan kode baru belum digunakan nota lain
         if ($validated['kode_transaksi'] !== $kodeLama) {
             $kodeSudahDipakai = Transaksi::kode($validated['kode_transaksi'])->exists();
 
@@ -154,9 +161,12 @@ class TransaksiController extends Controller
             }
         }
 
+        // DB::transaction membungkus proses hapus baris lama & simpan baris baru secara atomik
         DB::transaction(function () use ($validated, $kodeLama) {
+            // Hapus seluruh baris item barang lama dengan kode nota lama
             Transaksi::kode($kodeLama)->delete();
 
+            // Masukkan ulang baris item barang belanjaan baru
             foreach ($validated['items'] as $item) {
                 $barang = Barang::findOrFail($item['barang_id']);
 
@@ -177,7 +187,7 @@ class TransaksiController extends Controller
     }
 
     /**
-     * Hapus transaksi: semua baris dengan kode_transaksi yang sama dihapus sekaligus.
+     * Hapus transaksi: Seluruh baris barang yang memiliki kode_transaksi yang sama dihapus sekaligus.
      */
     public function destroy(Transaksi $transaksi)
     {

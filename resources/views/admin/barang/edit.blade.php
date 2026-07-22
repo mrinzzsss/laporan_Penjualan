@@ -28,26 +28,18 @@
                 @error('deskripsi') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Kode Barang</label>
-                    <input type="text" name="kode" value="{{ old('kode', $barang->kode) }}"
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
-                    @error('kode') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Kategori</label>
-                    <select name="kategori_id"
-                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
-                        <option value="">Tanpa kategori</option>
-                        @foreach ($kategoriList as $kategori)
-                            <option value="{{ $kategori->id }}" {{ old('kategori_id', $barang->kategori_id) == $kategori->id ? 'selected' : '' }}>
-                                {{ $kategori->nama }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('kategori_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Kategori</label>
+                <select name="kategori_id"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                    <option value="">Tanpa kategori</option>
+                    @foreach ($kategoriList as $kategori)
+                        <option value="{{ $kategori->id }}" {{ old('kategori_id', $barang->kategori_id) == $kategori->id ? 'selected' : '' }}>
+                            {{ $kategori->nama }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('kategori_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -60,15 +52,13 @@
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Gambar Barang</label>
 
-                @if ($barang->gambar_url)
-                    <div class="mb-2">
-                        <img src="{{ $barang->gambar_url }}" alt="{{ $barang->nama }}" class="w-20 h-20 rounded-lg object-cover border border-slate-200">
-                    </div>
-                @endif
+                <div id="preview-container" class="mb-3 {{ $barang->gambar_url ? '' : 'hidden' }}">
+                    <img id="image-preview" src="{{ $barang->gambar_url ?? '#' }}" alt="{{ $barang->nama }}" class="w-24 h-24 rounded-lg object-cover border border-slate-200 shadow-sm">
+                </div>
 
-                <input type="file" name="gambar" accept="image/*"
+                <input type="file" name="gambar" id="gambar-input" accept="image/*" onchange="previewImage(event)"
                        class="w-full text-sm text-slate-600 border border-slate-300 rounded-lg px-3 py-2 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-sky-50 file:text-sky-600 file:text-sm">
-                <p class="text-xs text-slate-400 mt-1">Biarkan kosong jika tidak ingin mengganti gambar.</p>
+                <p class="text-xs text-slate-400 mt-1">Biarkan kosong jika tidak ingin mengganti gambar. Format JPG/PNG/WEBP, maks 2MB.</p>
                 @error('gambar') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
 
@@ -90,3 +80,21 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('image-preview');
+                const container = document.getElementById('preview-container');
+                preview.src = e.target.result;
+                container.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
+@endpush

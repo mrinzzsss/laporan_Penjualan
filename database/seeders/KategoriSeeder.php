@@ -12,7 +12,7 @@ class KategoriSeeder extends Seeder
      */
     public function run(): void
     {
-        collect(['Makanan', 'Minuman', 'Snack'])
+        collect(['Makanan', 'Minuman'])
             ->each(fn ($nama) => Kategori::firstOrCreate(['nama' => $nama]));
     }
 }

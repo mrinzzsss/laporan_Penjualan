@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard') - Laporan Penjualan</title>
+    <title>@yield('title', 'Dashboard') - Kasir Kantin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     @stack('styles')
@@ -17,8 +17,8 @@
 
                 <div class="flex items-center gap-8">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2 font-bold text-slate-800 text-lg">
-                        <span class="w-8 h-8 rounded-lg bg-sky-400 flex items-center justify-center text-white text-sm">LP</span>
-                        Laporan Penjualan
+                        <span class="w-8 h-8 rounded-lg bg-sky-400 flex items-center justify-center text-white text-sm">KK</span>
+                        Kasir Kantin
                     </a>
 
                     <div class="hidden md:flex items-center gap-1">
@@ -36,9 +36,9 @@
                                class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('barang.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
                                 Barang
                             </a>
-                            <a href="{{ route('reports.index') }}"
-                               class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('reports.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
-                                Laporan
+                            <a href="{{ route('transaksi.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('transaksi.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                Transaksi
                             </a>
                         @endif
 
@@ -73,7 +73,7 @@
                 @if (auth()->user()?->isAdmin())
                     <a href="{{ route('kategori.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('kategori.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Kategori</a>
                     <a href="{{ route('barang.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('barang.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Barang</a>
-                    <a href="{{ route('reports.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('reports.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Laporan</a>
+                    <a href="{{ route('transaksi.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('transaksi.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Transaksi</a>
                 @endif
                 @if (auth()->user()?->isKasir())
                     <a href="{{ route('transaksi.index') }}" class="px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap {{ request()->routeIs('transaksi.*') ? 'bg-sky-50 text-sky-600' : 'text-slate-600 bg-slate-50' }}">Transaksi</a>

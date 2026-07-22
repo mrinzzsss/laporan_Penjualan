@@ -11,14 +11,18 @@ use Mpdf\Mpdf;
 
 class ReportController extends Controller
 {
+    /**
+     * Dependency Injection via Constructor: Menginjeksikan ChartImageService
+     * untuk membuat file gambar grafik PNG fisik di server yang akan ditaruh dalam file PDF.
+     */
     public function __construct(
         private readonly ChartImageService $chartImageService,
     ) {
     }
 
     /**
-     * Tampilkan halaman laporan chart tren penjualan (interaktif, pakai Chart.js).
-     * Default: 3 bulan terakhir, bisa di-override lewat query string start_date & end_date.
+     * Tampilkan halaman grafik laporan penjualan interaktif (menggunakan Chart.js).
+     * Rentang tanggal default: 3 bulan terakhir.
      */
     public function index(Request $request)
     {
@@ -41,9 +45,10 @@ class ReportController extends Controller
     }
 
     /**
-     * Generate laporan PDF. Chart digambar ulang di server (ChartImageService, pakai GD)
-     * jadi file PNG fisik di storage/app/public/charts, ditempel ke PDF, lalu dihapus lagi
-     * setelah PDF selesai dibuat.
+     * Meng-generate dokumen PDF laporan penjualan.
+     * Grafik digambar ulang di server sebagai file PNG fisik di folder storage disk public,
+     * disisipkan ke dalam HTML Blade PDF, dikonversi menjadi dokumen PDF oleh mPDF,
+     * lalu file gambar PNG sementara tersebut dihapus dari disk public (cleanup).
      */
     public function exportPdf(Request $request)
     {
@@ -51,13 +56,15 @@ class ReportController extends Controller
 
         $pdfOutput = $this->renderMpdf($html, $startDate, $endDate);
 
+        // Hapus file fisik grafik PNG dari disk public agar tidak memenuhi storage server
         $this->chartImageService->deleteFiles($chartPaths);
 
         return $pdfOutput;
     }
 
     /**
-     * Sama seperti exportPdf(), tapi file PNG chart-nya tidak dihapus (buat arsip).
+     * Meng-generate PDF laporan sama seperti exportPdf(), tetapi file grafik PNG-nya
+     * tidak dihapus dari disk public agar tersimpan sebagai arsip file di server.
      */
     public function exportPdfArchive(Request $request)
     {

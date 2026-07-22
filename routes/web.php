@@ -55,12 +55,6 @@ Route::middleware('auth.custom')->group(function () {
         });
     });
 
-    /*
-    |----------------------------------------------------------------------
-    | Khusus Kasir: input transaksi penjualan
-    |----------------------------------------------------------------------
-    */
-    Route::middleware('role:kasir')->group(function () {
-        Route::resource('transaksi', TransaksiController::class);
-    });
+    // Transaksi (Kasir & Admin): Admin bisa lihat & hapus, Kasir bisa CRUD lengkap
+    Route::resource('transaksi', TransaksiController::class);
 });

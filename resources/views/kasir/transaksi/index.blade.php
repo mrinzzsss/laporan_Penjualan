@@ -9,10 +9,12 @@
             <h1 class="text-xl font-bold text-slate-800">Transaksi Penjualan</h1>
             <p class="text-sm text-slate-500">Daftar nota transaksi yang sudah dicatat.</p>
         </div>
-        <a href="{{ route('transaksi.create') }}"
-           class="inline-flex items-center gap-2 bg-sky-400 hover:bg-sky-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition w-fit">
-            + Tambah Transaksi
-        </a>
+        @if (auth()->user()?->isKasir())
+            <a href="{{ route('transaksi.create') }}"
+               class="inline-flex items-center gap-2 bg-sky-400 hover:bg-sky-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition w-fit">
+                + Tambah Transaksi
+            </a>
+        @endif
     </div>
 
     <div class="bg-white rounded-xl border border-slate-200 mb-4">
@@ -50,7 +52,9 @@
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('transaksi.show', $item->id) }}" class="text-slate-500 hover:text-slate-700 font-medium">Lihat</a>
-                                <a href="{{ route('transaksi.edit', $item->id) }}" class="text-sky-500 hover:text-sky-600 font-medium">Edit</a>
+                                @if (auth()->user()?->isKasir())
+                                    <a href="{{ route('transaksi.edit', $item->id) }}" class="text-sky-500 hover:text-sky-600 font-medium">Edit</a>
+                                @endif
                                 <form method="POST" action="{{ route('transaksi.destroy', $item->id) }}" onsubmit="return confirm('Hapus transaksi ini?');">
                                     @csrf
                                     @method('DELETE')

@@ -10,25 +10,34 @@ class Barang extends Model
 {
     use HasFactory;
 
+    /**
+     * $table menentukan nama tabel database secara eksplisit.
+     */
     protected $table = 'barang';
 
+    /**
+     * $fillable berfungsi sebagai whitelist (daftar putih) kolom yang aman diisi via mass assignment.
+     * Melindungi aplikasi dari Mass Assignment Vulnerability saat memproses form.
+     */
     protected $fillable = [
         'kategori_id',
         'nama',
         'deskripsi',
-        'kode',
         'harga',
         'gambar',
         'is_active',
     ];
 
+    /**
+     * $casts mengonversi harga ke integer dan is_active ke tipe boolean secara otomatis.
+     */
     protected $casts = [
         'harga' => 'integer',
         'is_active' => 'boolean',
     ];
 
     /**
-     * Relasi: barang ini milik satu kategori (boleh kosong).
+     * Relasi Eloquent: Barang ini milik satu kategori (Many to 1).
      */
     public function kategori()
     {
@@ -36,7 +45,7 @@ class Barang extends Model
     }
 
     /**
-     * Relasi: satu barang bisa muncul di banyak baris transaksi.
+     * Relasi Eloquent: Satu barang bisa muncul di banyak baris transaksi (1 to Many).
      */
     public function transaksi()
     {
@@ -44,8 +53,8 @@ class Barang extends Model
     }
 
     /**
-     * Accessor: URL publik gambar barang dari storage.
-     * Pakai: $barang->gambar_url
+     * Accessor Eloquent: Membuat atribut semu $barang->gambar_url yang dinamis
+     * untuk mengubah path file di database menjadi URL link publik di storage.
      */
     public function getGambarUrlAttribute(): ?string
     {
@@ -53,11 +62,15 @@ class Barang extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->gambar);
+        if (str_starts_with($this->gambar, 'http://') || str_starts_with($this->gambar, 'https://')) {
+            return $this->gambar;
+        }
+
+        return asset('storage/' . $this->gambar);
     }
 
     /**
-     * Scope: hanya barang yang aktif (masih dijual).
+     * Local Scope Eloquent: Membuat query filter reusable untuk mengambil hanya barang yang aktif (Barang::active()).
      */
     public function scopeActive($query)
     {

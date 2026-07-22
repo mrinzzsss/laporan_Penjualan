@@ -6,7 +6,7 @@
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-xl font-bold text-slate-800">Laporan Penjualan</h1>
+            <h1 class="text-xl font-bold text-slate-800">Kasir Kantin</h1>
             <p class="text-sm text-slate-500">{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} &ndash; {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
         </div>
         <div class="flex gap-2">

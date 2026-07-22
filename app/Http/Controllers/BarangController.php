@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\Storage;
 class BarangController extends Controller
 {
     /**
-     * Tampilkan daftar barang.
+     * Tampilkan daftar barang produk.
+     * with('kategori') menggunakan Eager Loading agar query SQL efisien (mencegah N+1 Query Problem).
      */
     public function index(Request $request)
     {
         $barang = Barang::query()
-            ->with('kategori')
+            ->with('kategori') // Eager loading relasi kategori
             ->when($request->search, function ($query, $search) {
-                $query->where('nama', 'like', "%{$search}%");
+                $query->where('nama', 'like', "%{$search}%"); // Filter pencarian nama
             })
             ->latest()
             ->paginate(10)
@@ -27,32 +28,34 @@ class BarangController extends Controller
     }
 
     /**
-     * Tampilkan form tambah barang.
+     * Tampilkan form tambah barang baru.
      */
     public function create()
     {
-        $kategoriList = Kategori::orderBy('nama')->get();
+        $kategoriList = Kategori::orderBy('nama')->get(); // Data opsi dropdown kategori
 
         return view('admin.barang.create', compact('kategoriList'));
     }
 
     /**
-     * Simpan barang baru, termasuk upload gambar ke storage (disk public).
+     * Simpan barang baru ke database, termasuk mengunggah gambar ke storage disk public.
+     * Storage::disk('public')->store() menyimpan file fisik ke storage/app/public/barang.
      */
     public function store(Request $request)
     {
+        // Memvalidasi data input barang & file gambar (maksimal 2MB = 2048KB)
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string', 'max:255'],
-            'kode' => ['nullable', 'string', 'max:50', 'unique:barang,kode'],
             'kategori_id' => ['nullable', 'exists:kategori,id'],
             'harga' => ['required', 'integer', 'min:0'],
             'gambar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
+        // Cek jika pengguna meng-upload file gambar
         if ($request->hasFile('gambar')) {
-            // Disimpan di storage/app/public/barang, diakses lewat symlink storage:link
+            // Disimpan di storage/app/public/barang, diakses via URL publik lewat symlink storage:link
             $validated['gambar'] = $request->file('gambar')->store('barang', 'public');
         }
 
@@ -65,7 +68,7 @@ class BarangController extends Controller
     }
 
     /**
-     * Tampilkan detail barang.
+     * Tampilkan detail barang beserta gambar & kategori.
      */
     public function show(Barang $barang)
     {
@@ -85,14 +88,14 @@ class BarangController extends Controller
     }
 
     /**
-     * Update barang, termasuk replace gambar di storage jika ada upload baru.
+     * Update data barang di database, dan ganti foto di storage jika mengunggah gambar baru.
+     * Storage::disk('public')->delete() menghapus file foto lama dari disk server agar tidak menumpuk.
      */
     public function update(Request $request, Barang $barang)
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string', 'max:255'],
-            'kode' => ['nullable', 'string', 'max:50', 'unique:barang,kode,' . $barang->id],
             'kategori_id' => ['nullable', 'exists:kategori,id'],
             'harga' => ['required', 'integer', 'min:0'],
             'gambar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -100,11 +103,12 @@ class BarangController extends Controller
         ]);
 
         if ($request->hasFile('gambar')) {
-            // Hapus gambar lama supaya storage tidak menumpuk file yatim
+            // Hapus gambar lama dari disk public jika sebelumnya sudah ada foto
             if ($barang->gambar) {
                 Storage::disk('public')->delete($barang->gambar);
             }
 
+            // Simpan gambar baru
             $validated['gambar'] = $request->file('gambar')->store('barang', 'public');
         }
 
@@ -117,15 +121,15 @@ class BarangController extends Controller
     }
 
     /**
-     * Hapus barang beserta gambarnya dari storage.
+     * Hapus barang dari database beserta file gambar fisiknya dari storage disk public.
      */
     public function destroy(Barang $barang)
     {
         if ($barang->gambar) {
-            Storage::disk('public')->delete($barang->gambar);
+            Storage::disk('public')->delete($barang->gambar); // Hapus foto dari server
         }
 
-        $barang->delete();
+        $barang->delete(); // Hapus data dari tabel database
 
         return redirect()->route('barang.index')
             ->with('success', 'Barang berhasil dihapus.');

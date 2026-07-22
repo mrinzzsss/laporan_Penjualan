@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Laporan Penjualan</title>
+    <title>Login - Kasir Kantin</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 min-h-screen flex items-center justify-center px-4">
@@ -11,8 +11,8 @@
     <div class="w-full max-w-sm">
 
         <div class="text-center mb-6">
-            <span class="inline-flex w-12 h-12 rounded-xl bg-sky-400 items-center justify-center text-white font-bold text-lg mb-3">LP</span>
-            <h1 class="text-xl font-bold text-slate-800">Laporan Penjualan</h1>
+            <span class="inline-flex w-12 h-12 rounded-xl bg-sky-400 items-center justify-center text-white font-bold text-lg mb-3">KK</span>
+            <h1 class="text-xl font-bold text-slate-800">Kasir Kantin</h1>
             <p class="text-sm text-slate-500">Masuk untuk mengakses dashboard</p>
         </div>
 

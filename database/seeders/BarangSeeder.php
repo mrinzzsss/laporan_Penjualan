@@ -17,27 +17,17 @@ class BarangSeeder extends Seeder
     {
         $makanan = Kategori::where('nama', 'Makanan')->first();
         $minuman = Kategori::where('nama', 'Minuman')->first();
-        $snack = Kategori::where('nama', 'Snack')->first();
 
-        // Makanan
-        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Nasi Goreng', 'deskripsi' => 'Nasi goreng telur ayam suwir', 'kode' => 'MKN-001', 'harga' => 18000]);
-        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Mie Ayam', 'deskripsi' => 'Mie ayam pangsit rebus', 'kode' => 'MKN-002', 'harga' => 15000]);
-        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Ayam Geprek', 'deskripsi' => 'Ayam geprek sambal bawang', 'kode' => 'MKN-003', 'harga' => 17000]);
-        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Soto Ayam', 'deskripsi' => 'Soto ayam kuah bening', 'kode' => 'MKN-004', 'harga' => 16000]);
-        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Nasi Uduk', 'deskripsi' => 'Nasi uduk komplit lauk', 'kode' => 'MKN-005', 'harga' => 15000]);
+        // 5 Makanan
+        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Nasi Goreng', 'deskripsi' => 'Nasi goreng telur & ayam suwir spesial kantin', 'harga' => 15000, 'gambar' => 'barang/nasi-goreng.jpg']);
+        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Mie Goreng', 'deskripsi' => 'Mie goreng lezat dengan telur & sayuran', 'harga' => 13000, 'gambar' => 'barang/mie-goreng.jpg']);
+        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Kentang Goreng', 'deskripsi' => 'Kentang goreng / French fries renyah', 'harga' => 12000, 'gambar' => 'barang/kentang-goreng.jpg']);
+        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Pisang Goreng', 'deskripsi' => 'Pisang goreng crispy hangat 5 pcs', 'harga' => 10000, 'gambar' => 'barang/pisang-goreng.jpg']);
+        Barang::create(['kategori_id' => $makanan->id, 'nama' => 'Ayam Geprek', 'deskripsi' => 'Ayam geprek renyah sambal bawang pedas', 'harga' => 16000, 'gambar' => 'barang/ayam-geprek.jpg']);
 
-        // Minuman
-        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Es Teh Manis', 'deskripsi' => 'Teh manis dingin segar', 'kode' => 'MNM-001', 'harga' => 5000]);
-        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Es Jeruk', 'deskripsi' => 'Jeruk peras dingin', 'kode' => 'MNM-002', 'harga' => 7000]);
-        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Kopi Hitam', 'deskripsi' => 'Kopi tubruk khas', 'kode' => 'MNM-003', 'harga' => 8000]);
-        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Jus Alpukat', 'deskripsi' => 'Jus alpukat creamy coklat', 'kode' => 'MNM-004', 'harga' => 12000]);
-        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Air Mineral', 'deskripsi' => 'Air mineral botol 600ml', 'kode' => 'MNM-005', 'harga' => 4000]);
-
-        // Snack
-        Barang::create(['kategori_id' => $snack->id, 'nama' => 'Pisang Goreng', 'deskripsi' => 'Pisang goreng crispy 5 pcs', 'kode' => 'SNK-001', 'harga' => 10000]);
-        Barang::create(['kategori_id' => $snack->id, 'nama' => 'Tahu Isi', 'deskripsi' => 'Tahu isi sayur goreng', 'kode' => 'SNK-002', 'harga' => 8000]);
-        Barang::create(['kategori_id' => $snack->id, 'nama' => 'Risoles', 'deskripsi' => 'Risoles isi ragout ayam', 'kode' => 'SNK-003', 'harga' => 9000]);
-        Barang::create(['kategori_id' => $snack->id, 'nama' => 'Kentang Goreng', 'deskripsi' => 'French fries porsi sedang', 'kode' => 'SNK-004', 'harga' => 13000]);
-        Barang::create(['kategori_id' => $snack->id, 'nama' => 'Roti Bakar', 'deskripsi' => 'Roti bakar coklat keju', 'kode' => 'SNK-005', 'harga' => 14000]);
+        // 3 Minuman
+        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Air Mineral', 'deskripsi' => 'Air mineral botol 600ml dingin', 'harga' => 4000, 'gambar' => 'barang/air-mineral.jpg']);
+        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Kopi Hitam', 'deskripsi' => 'Kopi hitam tubruk mantap khas kantin', 'harga' => 7000, 'gambar' => 'barang/kopi-hitam.jpg']);
+        Barang::create(['kategori_id' => $minuman->id, 'nama' => 'Es Teh Manis', 'deskripsi' => 'Es teh manis dingin & segar', 'harga' => 5000, 'gambar' => 'barang/es-teh-manis.jpg']);
     }
 }

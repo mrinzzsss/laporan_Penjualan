@@ -11,7 +11,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * $fillable berfungsi sebagai whitelist (daftar putih) kolom yang boleh diisi
+     * secara mass-assignment (misal saat User::create($request->all())).
+     * Tujuannya melindungi aplikasi dari celah Mass Assignment Vulnerability agar
+     * pengguna tidak bisa menyisipkan kolom ilegal secara sembarangan.
      *
      * @var list<string>
      */
@@ -23,7 +26,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * $hidden berfungsi menyembunyikan kolom sensitif dari respon JSON atau Array
+     * agar data seperti password atau token tidak bocor saat dikirim ke frontend/API.
      *
      * @var list<string>
      */
@@ -33,7 +37,8 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * $casts berfungsi mengonversi tipe data kolom secara otomatis dari database ke tipe PHP.
+     * 'password' => 'hashed' otomatis meng-hash password dengan bcrypt saat diisi/di-update.
      *
      * @return array<string, string>
      */
@@ -46,7 +51,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi: satu user (kasir/admin) bisa input banyak baris transaksi penjualan.
+     * Relasi Eloquent: Satu user (kasir/admin) bisa menginput banyak baris transaksi penjualan (1 to Many).
      */
     public function transaksi()
     {
@@ -54,14 +59,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Helper cek role. Sengaja pakai plain string ('admin'/'kasir'),
-     * bukan enum, biar konsisten dengan gaya project yang lain.
+     * Helper method: Mengecek apakah user yang sedang aktif memiliki role Admin.
      */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
+    /**
+     * Helper method: Mengecek apakah user yang sedang aktif memiliki role Kasir.
+     */
     public function isKasir(): bool
     {
         return $this->role === 'kasir';

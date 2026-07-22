@@ -6,195 +6,217 @@
 
     <div class="mb-6">
         <h1 class="text-xl font-bold text-slate-800">Tambah Transaksi</h1>
-        <p class="text-sm text-slate-500">Catat transaksi penjualan baru.</p>
+        <p class="text-sm text-slate-500">Pilih menu di sebelah kiri untuk menambah item ke pesanan.</p>
     </div>
 
     @if ($errors->any())
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200 max-w-2xl">
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">
             @foreach ($errors->all() as $error)
                 <div>{{ $error }}</div>
             @endforeach
         </div>
     @endif
 
-    <div class="bg-white rounded-xl border border-slate-200 p-6 max-w-4xl mb-6">
-        <h2 class="text-sm font-semibold text-slate-700 mb-3">Pilih dari Menu</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        @foreach($kategoriList as $kategori)
-            @if($kategori->barang->isNotEmpty())
-            <div class="mb-5">
-                <h3 class="text-sm font-medium text-slate-600 mb-2">{{ $kategori->nama }}</h3>
-                <x-product-grid
-                    :barang-list="$kategori->barang"
-                    :add-onclick-for='fn ($barang) => sprintf("bukaModalMenu(%d, %s, %d)", $barang->id, json_encode($barang->nama), $barang->harga)'
-                />
-            </div>
-            @endif
-        @endforeach
-    </div>
+        {{-- KIRI: Katalog Menu (col-span-7 / 8) --}}
+        <div class="lg:col-span-7 xl:col-span-8 bg-white rounded-xl border border-slate-200 p-6">
+            <h2 class="text-base font-bold text-slate-800 mb-4">Pilih dari Menu</h2>
 
-    <div class="bg-white rounded-xl border border-slate-200 p-6 max-w-2xl">
-        <form method="POST" action="{{ route('transaksi.store') }}" id="transaksiForm" class="space-y-4">
-            @csrf
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Kode Transaksi</label>
-                    <input type="text" name="kode_transaksi" value="{{ old('kode_transaksi') }}" required
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+            @foreach($kategoriList as $kategori)
+                @if($kategori->barang->isNotEmpty())
+                <div class="mb-6 last:mb-0">
+                    <h3 class="text-sm font-semibold text-slate-700 mb-3 pb-1 border-b border-slate-100">{{ $kategori->nama }}</h3>
+                    <x-product-grid
+                        :barang-list="$kategori->barang"
+                        :add-onclick-for='fn ($barang) => sprintf("tambahKeKeranjang(%d)", $barang->id)'
+                    />
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal</label>
-                    <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" required
-                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
-                </div>
-            </div>
-
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <label class="block text-sm font-medium text-slate-700">Item Barang</label>
-                    <button type="button" onclick="addItemRow()" class="text-sm text-sky-500 hover:text-sky-600 font-medium">
-                        + Tambah Item
-                    </button>
-                </div>
-
-                <div id="itemRows" class="space-y-2">
-                    {{-- Baris item akan ditambahkan di sini oleh JavaScript --}}
-                </div>
-            </div>
-
-            <div class="text-right text-sm text-slate-600 pt-2 border-t border-slate-100">
-                Estimasi Total: <span id="estimatedTotal" class="font-semibold text-slate-800">Rp 0</span>
-            </div>
-
-            <div class="flex gap-3 pt-2">
-                <button type="submit" class="bg-sky-400 hover:bg-sky-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition">
-                    Simpan Transaksi
-                </button>
-                <a href="{{ route('transaksi.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-5 py-2.5 rounded-lg transition">
-                    Batal
-                </a>
-            </div>
-        </form>
-    </div>
-
-    <!-- Modal input jumlah dari card menu -->
-    <div id="modalMenu" class="fixed inset-0 bg-black/50 items-center justify-center z-50" style="display:none;">
-        <div class="bg-white rounded-xl p-5 w-full max-w-xs mx-4">
-            <div class="flex justify-between items-center mb-3">
-                <h3 id="modalMenuNama" class="text-sm font-semibold text-slate-800">Tambah Item</h3>
-                <button type="button" onclick="tutupModalMenu()" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
-            </div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">Jumlah</label>
-            <input type="number" id="modalMenuJumlah" min="1" value="1"
-                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
-            <button type="button" onclick="tambahDariModal()"
-                    class="w-full bg-sky-400 hover:bg-sky-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-                Tambah ke Nota
-            </button>
+                @endif
+            @endforeach
         </div>
+
+        {{-- KANAN: Panel Detail Transaksi / Keranjang (col-span-5 / 4) --}}
+        <div class="lg:col-span-5 xl:col-span-4 sticky top-20">
+            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                    <h2 class="text-base font-bold text-slate-800">Detail Transaksi</h2>
+                    <span id="cartCountBadge" class="text-xs bg-sky-100 text-sky-600 px-2.5 py-1 rounded-full font-medium">0 item</span>
+                </div>
+
+                <form method="POST" action="{{ route('transaksi.store') }}" id="transaksiForm" class="space-y-4">
+                    @csrf
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Kode Transaksi</label>
+                            <input type="text" name="kode_transaksi" value="{{ old('kode_transaksi', $kodeAuto) }}" required readonly
+                                   class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal</label>
+                            <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" required
+                                   class="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400">
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-700 mb-2">Item Pesanan</label>
+
+                        {{-- Tempat item pesanan yang dipilih --}}
+                        <div id="cartContainer" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                            {{-- Placeholder jika keranjang masih kosong --}}
+                            <div id="emptyCartState" class="py-8 text-center border border-dashed border-slate-200 rounded-lg text-slate-400 text-xs">
+                                Belum ada item dipilih.<br>Klik tombol <strong>+</strong> pada menu makanan di sebelah kiri.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 space-y-3">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-600 font-medium">Total Bayar:</span>
+                            <span id="estimatedTotal" class="text-base font-bold text-sky-600">Rp 0</span>
+                        </div>
+
+                        <div class="flex gap-2 pt-1">
+                            <button type="submit" id="submitBtn" disabled
+                                    class="flex-1 bg-sky-400 hover:bg-sky-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition">
+                                Simpan Transaksi
+                            </button>
+                            <a href="{{ route('transaksi.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2.5 rounded-lg transition">
+                                Batal
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 
 @endsection
 
 @push('scripts')
 <script>
-    // Daftar barang aktif beserta harga, dikirim dari controller (plain JS, tanpa TypeScript).
     const barangList = @json($barangList->map(fn ($b) => ['id' => $b->id, 'nama' => $b->nama, 'harga' => $b->harga]));
 
-    let rowCount = 0;
+    // State keranjang belanja: Map(barangId => quantity)
+    const cart = new Map();
 
-    function addItemRow(barangId = '', jumlah = 1) {
-        const container = document.getElementById('itemRows');
-        const rowIndex = rowCount++;
-
-        const row = document.createElement('div');
-        row.className = 'flex gap-2 items-start';
-        row.dataset.rowIndex = rowIndex;
-
-        const barangOptions = barangList.map(b =>
-            `<option value="${b.id}" data-harga="${b.harga}" ${String(b.id) === String(barangId) ? 'selected' : ''}>${b.nama} (Rp ${b.harga.toLocaleString('id-ID')})</option>`
-        ).join('');
-
-        row.innerHTML = `
-            <select name="items[${rowIndex}][barang_id]" required
-                    class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 barang-select">
-                <option value="">Pilih barang</option>
-                ${barangOptions}
-            </select>
-            <input type="number" name="items[${rowIndex}][jumlah]" value="${jumlah}" min="1" required
-                   class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 jumlah-input">
-            <button type="button" onclick="removeItemRow(this)" class="px-3 py-2 text-red-500 hover:text-red-600 text-sm">
-                Hapus
-            </button>
-        `;
-
-        container.appendChild(row);
-
-        row.querySelector('.barang-select').addEventListener('change', updateEstimatedTotal);
-        row.querySelector('.jumlah-input').addEventListener('input', updateEstimatedTotal);
-
-        updateEstimatedTotal();
+    function tambahKeKeranjang(barangId) {
+        const id = parseInt(barangId);
+        const currentQty = cart.get(id) || 0;
+        cart.set(id, currentQty + 1);
+        renderCart();
     }
 
-    function removeItemRow(button) {
-        button.closest('div[data-row-index]').remove();
-        updateEstimatedTotal();
+    function kurangiDariKeranjang(barangId) {
+        const id = parseInt(barangId);
+        const currentQty = cart.get(id) || 0;
+        if (currentQty > 1) {
+            cart.set(id, currentQty - 1);
+        } else {
+            cart.delete(id);
+        }
+        renderCart();
     }
 
-    function updateEstimatedTotal() {
+    function hapusDariKeranjang(barangId) {
+        const id = parseInt(barangId);
+        cart.delete(id);
+        renderCart();
+    }
+
+    function updateQtyDirect(barangId, qty) {
+        const id = parseInt(barangId);
+        const val = parseInt(qty);
+        if (isNaN(val) || val <= 0) {
+            cart.delete(id);
+        } else {
+            cart.set(id, val);
+        }
+        renderCart();
+    }
+
+    function renderCart() {
+        const container = document.getElementById('cartContainer');
+        const submitBtn = document.getElementById('submitBtn');
+        const badge = document.getElementById('cartCountBadge');
+        
+        container.innerHTML = '';
+
+        if (cart.size === 0) {
+            container.innerHTML = `
+                <div id="emptyCartState" class="py-8 text-center border border-dashed border-slate-200 rounded-lg text-slate-400 text-xs">
+                    Belum ada item dipilih.<br>Klik tombol <strong>+</strong> pada menu di sebelah kiri.
+                </div>
+            `;
+            document.getElementById('estimatedTotal').textContent = 'Rp 0';
+            submitBtn.disabled = true;
+            badge.textContent = '0 item';
+            return;
+        }
+
         let total = 0;
+        let totalItemCount = 0;
+        let index = 0;
 
-        document.querySelectorAll('#itemRows > div').forEach(row => {
-            const select = row.querySelector('.barang-select');
-            const jumlahInput = row.querySelector('.jumlah-input');
+        cart.forEach((qty, barangId) => {
+            const barang = barangList.find(b => b.id === barangId);
+            if (!barang) return;
 
-            const selectedOption = select.options[select.selectedIndex];
-            const harga = selectedOption ? parseInt(selectedOption.dataset.harga || 0) : 0;
-            const jumlah = parseInt(jumlahInput.value || 0);
+            const subtotal = barang.harga * qty;
+            total += subtotal;
+            totalItemCount += qty;
 
-            total += harga * jumlah;
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm';
+            
+            row.innerHTML = `
+                <input type="hidden" name="items[${index}][barang_id]" value="${barang.id}">
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-slate-800 text-xs truncate">${barang.nama}</div>
+                    <div class="text-[11px] text-slate-500">Rp ${barang.harga.toLocaleString('id-ID')} &times; ${qty} = <span class="font-medium text-slate-700">Rp ${subtotal.toLocaleString('id-ID')}</span></div>
+                </div>
+
+                <div class="flex items-center gap-1">
+                    <button type="button" onclick="kurangiDariKeranjang(${barang.id})"
+                            class="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-xs transition">
+                        -
+                    </button>
+                    <input type="number" name="items[${index}][jumlah]" value="${qty}" min="1"
+                           onchange="updateQtyDirect(${barang.id}, this.value)"
+                           class="w-10 text-center text-xs border border-slate-300 rounded py-0.5 focus:outline-none focus:ring-1 focus:ring-sky-400 font-medium">
+                    <button type="button" onclick="tambahKeKeranjang(${barang.id})"
+                            class="w-6 h-6 rounded bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold flex items-center justify-center text-xs transition">
+                        +
+                    </button>
+                </div>
+
+                <button type="button" onclick="hapusDariKeranjang(${barang.id})"
+                        class="w-6 h-6 rounded hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center text-sm font-bold transition" title="Hapus item">
+                    &times;
+                </button>
+            `;
+
+            container.appendChild(row);
+            index++;
         });
 
         document.getElementById('estimatedTotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
+        submitBtn.disabled = false;
+        badge.textContent = totalItemCount + ' item';
     }
 
-    // Mulai dengan 1 baris item kosong
-    addItemRow();
-
-    // ===== Modal "Pilih dari Menu" =====
-    let modalBarangId = null;
-
-    function bukaModalMenu(barangId, nama, harga) {
-        modalBarangId = barangId;
-        document.getElementById('modalMenuNama').textContent = 'Tambah: ' + nama;
-        document.getElementById('modalMenuJumlah').value = 1;
-        const modal = document.getElementById('modalMenu');
-        modal.style.display = 'flex';
-    }
-
-    function tutupModalMenu() {
-        document.getElementById('modalMenu').style.display = 'none';
-    }
-
-    function tambahDariModal() {
-        const jumlah = parseInt(document.getElementById('modalMenuJumlah').value || 1);
-        addItemRow(modalBarangId, jumlah);
-        tutupModalMenu();
-    }
-
-    document.getElementById('modalMenu').addEventListener('click', function (e) {
-        if (e.target === this) tutupModalMenu();
-    });
-
-    // Kalau datang dari tombol "+" di dashboard (?barang=ID), langsung buka modal jumlah.
-    (function bukaModalDariQuery() {
+    // Jika masuk dari tombol "+" di dashboard (?barang=ID), otomatis tambahkan ke keranjang
+    (function checkUrlQuery() {
         const params = new URLSearchParams(window.location.search);
         const barangId = params.get('barang');
-        if (!barangId) return;
-
-        const barang = barangList.find(b => String(b.id) === String(barangId));
-        if (barang) bukaModalMenu(barang.id, barang.nama, barang.harga);
+        if (barangId) {
+            tambahKeKeranjang(barangId);
+        } else {
+            renderCart();
+        }
     })();
 </script>
 @endpush

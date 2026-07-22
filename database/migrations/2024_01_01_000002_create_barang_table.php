@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('kategori_id')->nullable()->constrained('kategori')->nullOnDelete();
             $table->string('nama');
-            $table->string('kode')->unique()->nullable();
+            $table->string('deskripsi')->nullable();
             $table->unsignedBigInteger('harga'); // harga jual per unit (dalam rupiah)
             $table->string('gambar')->nullable(); // path gambar di storage
             $table->boolean('is_active')->default(true);
